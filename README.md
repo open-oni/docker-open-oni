@@ -49,13 +49,13 @@ $   -v $(pwd)/data:/opt/chronam/data \
 $   lyrasis/chronam:latest
 ```
 
-Build:
+Or, to build locally:
 
 ```bash
 $ docker build -t chronam:latest .
 ```
 
-Migrate and start Chronam:
+Migrate and start the local Chronam:
 
 ```bash
 $ docker run -i -t \
