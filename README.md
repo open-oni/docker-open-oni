@@ -27,7 +27,8 @@ Solr
 ----
 
 ```bash
-$ SOLR=4.10.4 docker run -d \
+$ export SOLR=4.10.4
+$ docker run -d \
 $   -p 8983:8983 \
 $   --name solr \
 $   -v $(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
@@ -73,6 +74,12 @@ $ cd data
 $ wget --recursive --no-host-directories --cut-dirs 1 --reject index.html* --include-directories /data/batches/batch_uuml_thys_ver01/ http://chroniclingamerica.loc.gov/data/batches/batch_uuml_thys_ver01/
 $ cd ..
 $ docker exec -it chronam /load_batch.sh batch_uuml_thys_ver01
+```
+
+**Run tests**
+
+```bash
+$ docker exec -it chronam /test.sh
 ```
 
 ---

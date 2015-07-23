@@ -40,8 +40,9 @@ RUN install -d /opt/chronam/static && install -d /opt/chronam/.python-eggs
 
 ADD load_batch.sh /load_batch.sh
 ADD startup.sh /startup.sh
+ADD test.sh /test.sh
 
-RUN chmod u+x /load_batch.sh && chmod u+x /startup.sh
+RUN chmod u+x /load_batch.sh && chmod u+x /startup.sh && chmod u+x /test.sh
 
 EXPOSE 80
 CMD ["/startup.sh"]
