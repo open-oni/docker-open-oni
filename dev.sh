@@ -3,11 +3,11 @@
 IP_ADDRESS=${1:-127.0.0.1}
 DELAY=${2:-10} # interval to wait for dependent docker services to initialize
 
-docker stop chronam-dev || true
-docker rm chronam-dev || true
+docker stop open-oni-dev || true
+docker rm open-oni-dev || true
 
-echo "Building chronam for development"
-docker build -t chronam:dev -f Dockerfile-dev .
+echo "Building open-oni for development"
+docker build -t open-oni:dev -f Dockerfile-dev .
 
 echo "Starting mysql ..."
 docker run -d \
@@ -36,9 +36,9 @@ sleep $DELAY
 echo "Starting chronam for development ..."
 docker run -i -t \
   -p 80:80 \
-  --name chronam-dev \
+  --name open-oni-dev \
   --link mysql:db \
   --link solr:solr \
-  -v $(pwd)/chronam/core:/opt/chronam/core \
+  -v $(pwd)/open-oni/core:/opt/chronam/core \
   -v $(pwd)/data:/opt/chronam/data \
-  chronam:dev
+  open-oni:dev
