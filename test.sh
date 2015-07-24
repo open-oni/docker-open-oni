@@ -1,8 +1,8 @@
 #!/bin/bash
 
-BATCH=$1
+APP=core
 
 source /opt/chronam/ENV/bin/activate
 
 cd /opt/chronam
-django-admin.py test core
+django-admin.py test $APP
