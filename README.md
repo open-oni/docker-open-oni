@@ -81,7 +81,7 @@ $ docker exec -it chronam /load_batch.sh batch_uuml_thys_ver01
 Chronam Development
 -------------------
 
-First clone chronam: `git clone git@github.com:LibraryOfCongress/chronam.git`. For a quickstart use `dev.sh`, for more control use:
+First clone chronam: `git clone git@github.com:LibraryOfCongress/chronam.git`. For a quickstart use `./dev.sh` (note for `docker-machine` use `./dev.sh $IP_ADDRESS_OF_MACHINE`), for more control use:
 
 ```bash
 $ docker build -t chronam:dev -f Dockerfile-dev .

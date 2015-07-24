@@ -1,6 +1,7 @@
 #!/bin/bash
 
-DELAY=10 # interval to wait for dependent docker services to initialize
+IP_ADDRESS=${1:-127.0.0.1}
+DELAY=${2:-10} # interval to wait for dependent docker services to initialize
 
 docker stop chronam-dev || true
 docker rm chronam-dev || true
@@ -19,7 +20,7 @@ docker run -d \
   mysql || true
 
 sleep $DELAY
-mysql -h 127.0.0.1 -u root --password=123456 -e 'ALTER DATABASE chronam charset=utf8;'
+mysql -h $IP_ADDRESS -u root --password=123456 -e 'ALTER DATABASE chronam charset=utf8;'
 
 echo "Starting solr ..."
 export SOLR=4.10.4
