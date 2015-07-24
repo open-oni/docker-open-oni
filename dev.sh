@@ -19,6 +19,7 @@ docker run -d \
   mysql || true
 
 sleep $DELAY
+mysql -h 127.0.0.1 -u root --password=123456 -e 'ALTER DATABASE chronam charset=utf8;'
 
 echo "Starting solr ..."
 export SOLR=4.10.4
