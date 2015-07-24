@@ -25,7 +25,7 @@ ADD apache/chronam.conf /etc/apache2/sites-available/chronam.conf
 RUN a2dissite 000-default.conf
 RUN a2ensite chronam
 
-RUN git clone https://github.com/LibraryOfCongress/chronam.git /opt/chronam
+ADD chronam /opt/chronam
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 WORKDIR /opt/chronam
