@@ -110,6 +110,14 @@ $ -v /$(pwd)/settings.py:/opt/chronam/settings.py \ # note: DB_HOST and SOLR_HOS
 
 Volume mounting is optional. You can always rebuild the image and rerun the container during development. To test modifications to the requirements file re-run the build command. Use the `dev.sh` script to simplify this.
 
+**Workflow**
+
+You should be able to develop in the `open-oni` repository folder as normal i.e. make feature branches etc. For any folder that was volume mounted the changes should be viewable immediately in the browser. When ready, make a pull request. To test a pull request simply pull the remote feature branch (again, as normal) and run the container including the appropriate volume mount (which will typically include `core`). Using Docker shouldn't change your regular development workflow much at all.
+
+For changes that will impact installation a rebuild is required (i.e. changing django versions). In that case `stop` and `rm` open-oni-dev and rebuild with `docker build -t open-oni:dev -f Dockerfile-dev .` and rerun.
+
+**Note:** do not attempt to volume mount the entire open-oni repository folder. It won't work as the virtualenv environment only exists inside the container, generated at build time. Workaround?
+
 **Run tests**
 
 ```bash
