@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IP_ADDRESS=${1:-127.0.0.1}
-DELAY=${2:-10} # interval to wait for dependent docker services to initialize
+DELAY=${2:-20} # interval to wait for dependent docker services to initialize
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
