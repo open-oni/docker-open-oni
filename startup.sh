@@ -1,5 +1,9 @@
 #!/bin/bash
 
+export APACHE_RUN_USER=www-data
+export APACHE_RUN_GROUP=www-data
+mkdir -p /var/tmp/django_cache && chown -R www-data:www-data /var/tmp/django_cache
+
 source /opt/chronam/ENV/bin/activate
 
 sed -i "s/!DB_HOST!/$DB_PORT_3306_TCP_ADDR/g" /opt/chronam/settings.py

@@ -40,5 +40,6 @@ docker run -i -t \
   --link mysql:db \
   --link solr:solr \
   -v $(pwd)/open-oni/core:/opt/chronam/core \
+  -v $(pwd)/open-oni/conf:/opt/chronam/conf \
   -v $(pwd)/data:/opt/chronam/data \
   open-oni:dev
