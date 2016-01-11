@@ -34,7 +34,7 @@ RUN virtualenv ENV && \
   source /opt/openoni/ENV/bin/activate && \
   cp conf/openoni.pth ENV/lib/python2.7/site-packages/openoni.pth && \
   pip install -U distribute && \
-  pip install -r requirements.pip --allow-all-external
+  pip install -r requirements.pip --allow-unverified PIL --allow-all-external
 ADD settings.py /opt/openoni/settings.py
 
 RUN install -d /opt/openoni/static && install -d /opt/openoni/.python-eggs
