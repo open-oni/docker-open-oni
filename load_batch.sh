@@ -2,7 +2,7 @@
 
 BATCH=$1
 
-source /opt/chronam/ENV/bin/activate
+source /opt/openoni/ENV/bin/activate
 
-cd /opt/chronam
-django-admin.py load_batch /opt/chronam/data/batches/$BATCH
+cd /opt/openoni
+django-admin.py load_batch /opt/openoni/data/batches/$BATCH

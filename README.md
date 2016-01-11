@@ -1,7 +1,7 @@
 Docker open-oni
 ===============
 
-Run open-oni (community chronam fork) in Docker.
+Run open-oni (community chronicling america fork) in Docker.
 
 MySQL
 -----
@@ -11,16 +11,16 @@ $ docker run -d \
 $   -p 3306:3306 \
 $   --name mysql \
 $   -e MYSQL_ROOT_PASSWORD=123456 \
-$   -e MYSQL_DATABASE=chronam \
-$   -e MYSQL_USER=chronam \
-$   -e MYSQL_PASSWORD=chronam \
+$   -e MYSQL_DATABASE=openoni \
+$   -e MYSQL_USER=openoni \
+$   -e MYSQL_PASSWORD=openoni \
 $   mysql
 ```
 
 Now alter the `charset`:
 
 ```bash
-$ mysql -h 127.0.0.1 -u root --password=123456 -e 'ALTER DATABASE chronam charset=utf8;'
+$ mysql -h 127.0.0.1 -u root --password=123456 -e 'ALTER DATABASE openoni charset=utf8;'
 ```
 
 Solr
@@ -47,7 +47,7 @@ $   -p 80:80 \
 $   --name open-oni \
 $   --link mysql:db \
 $   --link solr:solr \
-$   -v /$(pwd)/data:/opt/chronam/data \
+$   -v /$(pwd)/data:/opt/openoni/data \
 $   openoni/open-oni:latest
 $ # "openoni" is correct for dockerhub org name
 ```
@@ -66,7 +66,7 @@ $   -p 80:80 \
 $   --name open-oni \
 $   --link mysql:db \
 $   --link solr:solr \
-$   -v /$(pwd)/data:/opt/chronam/data \
+$   -v /$(pwd)/data:/opt/openoni/data \
 $   open-oni:latest
 ```
 
@@ -96,16 +96,16 @@ $   -p 80:80 \
 $   --name open-oni-dev \
 $   --link mysql:db \
 $   --link solr:solr \
-$   -v /$(pwd)/open-oni/core:/opt/chronam/core \
-$   -v /$(pwd)/data:/opt/chronam/data \
+$   -v /$(pwd)/open-oni/core:/opt/openoni/core \
+$   -v /$(pwd)/data:/opt/openoni/data \
 $   open-oni:dev
 ```
 
 In the above example the `core` folder has been host volume mounted for dynamic development. You can mount additional files / folders as needed. For example:
 
 ```
-$ -v /$(pwd)/open-oni/nebraska:/opt/chronam/nebraska \ # for a custom "app"
-$ -v /$(pwd)/settings.py:/opt/chronam/settings.py \ # note: DB_HOST and SOLR_HOST will be overrewritten
+$ -v /$(pwd)/open-oni/nebraska:/opt/openoni/nebraska \ # for a custom "app"
+$ -v /$(pwd)/settings.py:/opt/openoni/settings.py \ # note: DB_HOST and SOLR_HOST will be overrewritten
 ```
 
 Volume mounting is optional. You can always rebuild the image and rerun the container during development. To test modifications to the requirements file re-run the build command. Use the `dev.sh` script to simplify this.

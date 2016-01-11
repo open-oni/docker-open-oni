@@ -1,7 +1,7 @@
 FROM ubuntu:trusty
 MAINTAINER Mark Cooper <mark.cooper@lyrasis.org>
 
-ENV DJANGO_SETTINGS_MODULE chronam.settings
+ENV DJANGO_SETTINGS_MODULE openoni.settings
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends \
@@ -21,23 +21,23 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends \
   supervisor
 
 RUN a2enmod cache expires rewrite
-ADD apache/chronam.conf /etc/apache2/sites-available/chronam.conf
+ADD apache/openoni.conf /etc/apache2/sites-available/openoni.conf
 RUN a2dissite 000-default.conf
-RUN a2ensite chronam
+RUN a2ensite openoni
 
-RUN git clone https://github.com/open-oni/open-oni.git /opt/chronam
+RUN git clone https://github.com/open-oni/open-oni.git /opt/openoni
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
-WORKDIR /opt/chronam
+WORKDIR /opt/openoni
 RUN mkdir -p data/batches && mkdir -p data/cache && mkdir -p data/bib
 RUN virtualenv ENV && \
-  source /opt/chronam/ENV/bin/activate && \
-  cp conf/chronam.pth ENV/lib/python2.7/site-packages/chronam.pth && \
+  source /opt/openoni/ENV/bin/activate && \
+  cp conf/openoni.pth ENV/lib/python2.7/site-packages/openoni.pth && \
   pip install -U distribute && \
-  pip install -r requirements.pip --allow-unverified PIL --allow-all-external
-ADD settings.py /opt/chronam/settings.py
+  pip install -r requirements.pip --allow-all-external
+ADD settings.py /opt/openoni/settings.py
 
-RUN install -d /opt/chronam/static && install -d /opt/chronam/.python-eggs
+RUN install -d /opt/openoni/static && install -d /opt/openoni/.python-eggs
 
 ADD load_batch.sh /load_batch.sh
 ADD startup.sh /startup.sh
