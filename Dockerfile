@@ -34,7 +34,7 @@ RUN virtualenv ENV && \
   source /opt/chronam/ENV/bin/activate && \
   cp conf/chronam.pth ENV/lib/python2.7/site-packages/chronam.pth && \
   pip install -U distribute && \
-  pip install -r requirements.pip --allow-unverified PIL --allow-all-external
+  pip install -r requirements.pip --allow-all-external
 ADD settings.py /opt/chronam/settings.py
 
 RUN install -d /opt/chronam/static && install -d /opt/chronam/.python-eggs
