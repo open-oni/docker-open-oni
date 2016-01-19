@@ -14,13 +14,13 @@ docker run -d \
   -p 3306:3306 \
   --name mysql \
   -e MYSQL_ROOT_PASSWORD=123456 \
-  -e MYSQL_DATABASE=chronam \
-  -e MYSQL_USER=chronam \
-  -e MYSQL_PASSWORD=chronam \
+  -e MYSQL_DATABASE=openoni \
+  -e MYSQL_USER=openoni \
+  -e MYSQL_PASSWORD=openoni \
   mysql || true
 
 sleep $DELAY
-mysql -h $IP_ADDRESS -u root --password=123456 -e 'ALTER DATABASE chronam charset=utf8;'
+mysql -h $IP_ADDRESS -u root --password=123456 -e 'ALTER DATABASE openoni charset=utf8;'
 
 echo "Starting solr ..."
 export SOLR=4.10.4
@@ -33,12 +33,12 @@ docker run -d \
 
 sleep $DELAY
 
-echo "Starting chronam for development ..."
+echo "Starting open-oni for development ..."
 docker run -i -t \
   -p 80:80 \
   --name open-oni-dev \
   --link mysql:db \
   --link solr:solr \
-  -v $(pwd)/open-oni/core:/opt/chronam/core \
-  -v $(pwd)/data:/opt/chronam/data \
+  -v $(pwd)/open-oni/core:/opt/openoni/core \
+  -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev

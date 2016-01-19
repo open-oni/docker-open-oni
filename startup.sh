@@ -1,13 +1,13 @@
 #!/bin/bash
 
-source /opt/chronam/ENV/bin/activate
+source /opt/openoni/ENV/bin/activate
 
-sed -i "s/!DB_HOST!/$DB_PORT_3306_TCP_ADDR/g" /opt/chronam/settings.py
-sed -i "s/!SOLR_HOST!/$SOLR_PORT_8983_TCP_ADDR/g" /opt/chronam/settings.py
+sed -i "s/!DB_HOST!/$DB_PORT_3306_TCP_ADDR/g" /opt/openoni/settings.py
+sed -i "s/!SOLR_HOST!/$SOLR_PORT_8983_TCP_ADDR/g" /opt/openoni/settings.py
 
-cd /opt/chronam
+cd /opt/openoni
 django-admin.py syncdb --noinput --migrate
-django-admin.py chronam_sync --skip-essays
+django-admin.py openoni_sync --skip-essays
 django-admin.py collectstatic --noinput
 
 
