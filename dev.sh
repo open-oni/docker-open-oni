@@ -3,6 +3,7 @@
 IP_ADDRESS=${1:-127.0.0.1}
 DELAY=${2:-10} # interval to wait for dependent docker services to initialize
 MYSQL_ROOT_PASSWORD=123456
+PORT=${DOCKERPORT:-80}
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
@@ -33,7 +34,7 @@ docker run -d \
 
 echo "Starting open-oni for development ..."
 docker run -i -t \
-  -p 80:80 \
+  -p $PORT:80 \
   --name open-oni-dev \
   --link mysql:db \
   --link solr:solr \
