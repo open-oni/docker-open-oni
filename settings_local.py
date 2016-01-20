@@ -10,5 +10,5 @@ DATABASES = {
     }
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '!SECRETKEY!'
+SECRET_KEY = '!SECRET_KEY!'
 SOLR = "http://!SOLR_HOST!:8983/solr"
