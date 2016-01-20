@@ -8,6 +8,13 @@ PORT=${DOCKERPORT:-80}
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
 
+if [ ! -f open-oni/settings_local.py ]; then
+  cp settings_local.py open-oni/
+else
+  echo "You already have a local settings file.  Make sure it is configured"
+  echo "for Docker's SOLR and MySQL config. (see settings_local.py)"
+fi
+
 echo "Building open-oni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
@@ -33,11 +40,14 @@ docker run -d \
   makuk66/docker-solr:$SOLR && sleep $DELAY
 
 echo "Starting open-oni for development ..."
+
+# Make sure subdirs are built
+mkdir -p data/batches data/cache data/bib
 docker run -i -t \
   -p $PORT:80 \
   --name open-oni-dev \
   --link mysql:db \
   --link solr:solr \
-  -v $(pwd)/open-oni/core:/opt/openoni/core \
+  -v $(pwd)/open-oni:/opt/openoni \
   -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev
