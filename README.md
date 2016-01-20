@@ -20,7 +20,7 @@ $   mysql
 Now alter the `charset`:
 
 ```bash
-$ mysql -h 127.0.0.1 -u root --password=123456 -e 'ALTER DATABASE openoni charset=utf8;'
+$ docker exec mysql mysql -u root --password=123456 -e 'ALTER DATABASE openoni charset=utf8';
 ```
 
 Solr

@@ -2,6 +2,7 @@
 
 IP_ADDRESS=${1:-127.0.0.1}
 DELAY=${2:-10} # interval to wait for dependent docker services to initialize
+MYSQL_ROOT_PASSWORD=123456
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
@@ -13,14 +14,15 @@ echo "Starting mysql ..."
 docker run -d \
   -p 3306:3306 \
   --name mysql \
-  -e MYSQL_ROOT_PASSWORD=123456 \
+  -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
   -e MYSQL_DATABASE=openoni \
   -e MYSQL_USER=openoni \
   -e MYSQL_PASSWORD=openoni \
   mysql || true
 
 sleep $DELAY
-mysql -h $IP_ADDRESS -u root --password=123456 -e 'ALTER DATABASE openoni charset=utf8;'
+
+docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 
 echo "Starting solr ..."
 export SOLR=4.10.4
