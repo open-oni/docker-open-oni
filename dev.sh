@@ -3,9 +3,15 @@
 IP_ADDRESS=${1:-127.0.0.1}
 DELAY=${2:-10} # interval to wait for dependent docker services to initialize
 MYSQL_ROOT_PASSWORD=123456
+PORT=${DOCKERPORT:-80}
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
+
+# Make sure settings_local.py exists so the app doesn't crash
+if [ ! -f open-oni/settings_local.py ]; then
+  touch open-oni/settings_local.py
+fi
 
 echo "Building open-oni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
@@ -18,9 +24,7 @@ docker run -d \
   -e MYSQL_DATABASE=openoni \
   -e MYSQL_USER=openoni \
   -e MYSQL_PASSWORD=openoni \
-  mysql || true
-
-sleep $DELAY
+  mysql && sleep $DELAY
 
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 
@@ -31,16 +35,17 @@ docker run -d \
   --name solr \
   -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
   -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
-  makuk66/docker-solr:$SOLR || true
-
-sleep $DELAY
+  makuk66/docker-solr:$SOLR && sleep $DELAY
 
 echo "Starting open-oni for development ..."
+
+# Make sure subdirs are built
+mkdir -p data/batches data/cache data/bib
 docker run -i -t \
-  -p 80:80 \
+  -p $PORT:80 \
   --name open-oni-dev \
   --link mysql:db \
   --link solr:solr \
-  -v $(pwd)/open-oni/core:/opt/openoni/core \
+  -v $(pwd)/open-oni:/opt/openoni \
   -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev
