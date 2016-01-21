@@ -28,6 +28,10 @@ docker run -d \
 
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 
+# set up access to a test database, for masochists
+docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
+GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
+
 echo "Starting solr ..."
 export SOLR=4.10.4
 docker run -d \
