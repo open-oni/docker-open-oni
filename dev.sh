@@ -8,11 +8,9 @@ PORT=${DOCKERPORT:-80}
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
 
+# Make sure settings_local.py exists so the app doesn't crash
 if [ ! -f open-oni/settings_local.py ]; then
-  cp settings_local.py open-oni/
-else
-  echo "You already have a local settings file.  Make sure it is configured"
-  echo "for Docker's SOLR and MySQL config. (see settings_local.py)"
+  touch open-oni/settings_local.py
 fi
 
 echo "Building open-oni for development"
