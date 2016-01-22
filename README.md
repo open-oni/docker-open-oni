@@ -1,28 +1,46 @@
 Docker open-oni
 ===============
 
+Install Docker.  We have comprehensive instructions for
+[installing Docker on OS X](https://github.com/open-oni/open-oni/wiki/Docker-Setup-OS-X)
+on the open-oni wiki.
+
+production
+---
+
 (Production instructions TBD - for now this is just for doing open-oni dev)
 
 open-oni development
---------------------
+---
 
-First clone open-oni: `git clone git@github.com:open-oni/open-oni.git`.
+Clone this repo, and then clone open-oni inside it:
 
-It's easiest to start with [`./dev.sh`](dev.sh)  - it sets up all the containers in
-order, and makes sure the app is ready to run.  Note for `docker-machine`: use
-`./dev.sh $IP_ADDRESS_OF_MACHINE`.  For Linux users who can't (or don't want
-to) expose port 80, the environment variable `DOCKERPORT` will override the
-default of using port 80.
+```bash
+git clone git@github.com:open-oni/docker-open-oni.git
+
+# Wait until the clone is finished, then:
+cd docker-open-oni
+git clone git@github.com:open-oni/open-oni.git
+```
+
+### Quick setup
+
+For a quick setup, just run [`./dev.sh`](dev.sh)  - it sets up all the
+containers in order, and makes sure the app is ready to run.  For Linux users
+who can't (or don't want to) expose port 80, the environment variable
+`DOCKERPORT` will override the default of using port 80.
+
+### Manual setup
 
 For more control, you can run the commands manually:
 
-### Build the app image
+#### Build the app image
 
 ```bash
 docker build -t open-oni:dev -f Dockerfile-dev .
 ```
 
-### Build mysql and configure it
+#### Build mysql and configure it
 
 ```bash
 docker run -d \
@@ -46,7 +64,7 @@ GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 ```
 
-### Build solr
+#### Build solr
 
 This gives us 4.10.4, which is an unofficial docker image, but for now that's
 what openoni uses.
@@ -60,7 +78,7 @@ docker run -d \
   makuk66/docker-solr:4.10.4
 ```
 
-### Build open-oni
+#### Build open-oni
 
 Start the development open-oni.  This will install requirements if needed, and
 run various django admin commands as found in [`startup.sh`](startup.sh):
@@ -123,4 +141,8 @@ docker exec -it open-oni-dev /load_batch.sh batch_uuml_thys_ver01
 docker exec -it open-oni-dev /test.sh
 ```
 
----
+**Jump into the container**
+
+```bash
+docker exec -it open-oni-dev bash
+```
