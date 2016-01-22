@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IP_ADDRESS=${1:-127.0.0.1}
-SOLRDELAY=${SOLRDELAY:-20} # interval to wait for dependent docker services to initialize
+SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
 MYSQL_ROOT_PASSWORD=123456
 PORT=${DOCKERPORT:-80}
 DB_READY=0
