@@ -48,9 +48,6 @@ do
  fi
 done
 
-
-#docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
-
 # set up access to a test database, for masochists
 echo "setting up a test database ..."
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
