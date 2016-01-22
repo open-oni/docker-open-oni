@@ -18,7 +18,7 @@ docker build -t open-oni:dev -f Dockerfile-dev .
 
 echo "Starting mysql ..."
 docker run -d \
-  -p 3306:3306 \
+  -p 3307:3306 \
   --name mysql \
   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
   -e MYSQL_DATABASE=openoni \
@@ -26,7 +26,7 @@ docker run -d \
   -e MYSQL_PASSWORD=openoni \
   mysql
 
-docker exec mysql mysqladmin --silent --wait=30 ping || exit 1
+docker exec mysql mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD --silent --wait=$DELAY ping || exit 1
 
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 
