@@ -16,32 +16,47 @@ fi
 echo "Building open-oni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
-echo "Starting mysql ..."
-docker run -d \
-  -p 3306:3306 \
-  --name mysql \
-  -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
-  -e MYSQL_DATABASE=openoni \
-  -e MYSQL_USER=openoni \
-  -e MYSQL_PASSWORD=openoni \
-  mysql
+MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" mysql)
+if [ -z "$MYSQL_STATUS" ]; then
+  echo "Starting mysql ..."
+  docker run -d \
+    -p 3306:3306 \
+    --name mysql \
+    -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+    -e MYSQL_DATABASE=openoni \
+    -e MYSQL_USER=openoni \
+    -e MYSQL_PASSWORD=openoni \
+    mysql
 
-docker exec mysql mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD --silent --wait=$DELAY ping || exit 1
+  docker exec mysql mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD --silent --wait=$DELAY ping || exit 1
+  docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 
-docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
+  # set up access to a test database, for masochists
+  docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
+  GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
+else
+  echo "Existing mysql container found"
+  if [ "$MYSQL_STATUS" == "false" ]; then
+    docker start mysql
+  fi
+fi
 
-# set up access to a test database, for masochists
-docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
-GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
-
-echo "Starting solr ..."
-export SOLR=4.10.4
-docker run -d \
-  -p 8983:8983 \
-  --name solr \
-  -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
-  -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
-  makuk66/docker-solr:$SOLR && sleep $DELAY
+SOLR_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" solr)
+if [ -z "$SOLR_STATUS" ]; then
+  echo "Starting solr ..."
+  export SOLR=4.10.4
+  docker run -d \
+    -p 8983:8983 \
+    --name solr \
+    -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
+    -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+    makuk66/docker-solr:$SOLR && sleep $DELAY
+else
+  echo "Existing solr container found"
+  if [ "$SOLR_STATUS" == "false" ]; then
+    docker start solr
+  fi
+fi
 
 echo "Starting open-oni for development ..."
 
