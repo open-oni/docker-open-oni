@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Installs pip dependencies
 cd /opt/openoni
 virtualenv ENV
