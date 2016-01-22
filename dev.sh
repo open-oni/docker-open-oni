@@ -24,7 +24,9 @@ docker run -d \
   -e MYSQL_DATABASE=openoni \
   -e MYSQL_USER=openoni \
   -e MYSQL_PASSWORD=openoni \
-  mysql && sleep $DELAY
+  mysql
+
+docker exec mysql mysqladmin --silent --wait=30 ping || exit 1
 
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 
