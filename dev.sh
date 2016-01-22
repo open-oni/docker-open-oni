@@ -1,9 +1,12 @@
 #!/bin/bash
 
 IP_ADDRESS=${1:-127.0.0.1}
-DELAY=${2:-10} # interval to wait for dependent docker services to initialize
+SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
 MYSQL_ROOT_PASSWORD=123456
 PORT=${DOCKERPORT:-80}
+DB_READY=0
+TRIES=0
+MAX_TRIES=12
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
@@ -24,11 +27,29 @@ docker run -d \
   -e MYSQL_DATABASE=openoni \
   -e MYSQL_USER=openoni \
   -e MYSQL_PASSWORD=openoni \
-  mysql && sleep $DELAY
+  mysql
 
-docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
+while [ $DB_READY == 0 ]
+do
+ if
+   ! docker exec mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
+     -e 'ALTER DATABASE openoni charset=utf8' > /dev/null 2>/dev/null
+ then
+   sleep 5
+   let TRIES++
+   echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES" 
+   if [ "$TRIES" = "$MAX_TRIES" ]
+   then
+    echo "Looks like we couldn't get MySQL running. Could you check settings and try again?"
+    exit 2
+   fi
+ else
+   DB_READY=1
+ fi
+done
 
 # set up access to a test database, for masochists
+echo "setting up a test database ..."
 docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
 GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
 
@@ -39,7 +60,7 @@ docker run -d \
   --name solr \
   -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
   -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
-  makuk66/docker-solr:$SOLR && sleep $DELAY
+  makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
 
 echo "Starting open-oni for development ..."
 
