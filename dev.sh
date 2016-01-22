@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IP_ADDRESS=${1:-127.0.0.1}
-DELAY=${2:-10} # interval to wait for dependent docker services to initialize
+DELAY=${2:-60} # interval to wait for dependent docker services to initialize
 MYSQL_ROOT_PASSWORD=123456
 PORT=${DOCKERPORT:-80}
 
@@ -18,7 +18,7 @@ docker build -t open-oni:dev -f Dockerfile-dev .
 
 echo "Starting mysql ..."
 docker run -d \
-  -p 3307:3306 \
+  -p 3306:3306 \
   --name mysql \
   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
   -e MYSQL_DATABASE=openoni \
