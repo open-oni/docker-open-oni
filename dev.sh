@@ -35,7 +35,7 @@ do
    ! docker exec mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
      -e 'ALTER DATABASE openoni charset=utf8' > /dev/null 2>/dev/null
  then
-   SLEEP 5
+   sleep 5
    let TRIES++
    echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES" 
    if [ "$TRIES" = "$MAX_TRIES" ]
