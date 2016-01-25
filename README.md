@@ -40,16 +40,26 @@ For more control, you can run the commands manually:
 docker build -t open-oni:dev -f Dockerfile-dev .
 ```
 
+#### Build data containers for mysql and solr
+
+```bash
+docker create -v /var/lib/mysql \
+  --name openoni-dev-data-mysql mysql
+docker create -v /opt/solr \
+  --name openoni-dev-data-solr makuk66/docker-solr:$SOLR
+```
+
 #### Build mysql and configure it
 
 ```bash
 docker run -d \
   -p 3306:3306 \
-  --name mysql \
+  --name openoni-dev-mysql \
   -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
   -e MYSQL_DATABASE=openoni \
   -e MYSQL_USER=openoni \
   -e MYSQL_PASSWORD=openoni \
+  --volumes-from openoni-dev-data-mysql \
   mysql
 ```
 
@@ -57,11 +67,11 @@ docker run -d \
 
 ```
 # Set up the test database permissions
-docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
+docker exec openoni-dev-mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
 GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
 
 # Set the character set
-docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
+docker exec openoni-dev-mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'ALTER DATABASE openoni charset=utf8';
 ```
 
 #### Build solr
@@ -72,9 +82,10 @@ what openoni uses.
 ```bash
 docker run -d \
   -p 8983:8983 \
-  --name solr \
+  --name openoni-dev-solr \
   -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
   -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+  --volumes-from openoni-dev-data-solr \
   makuk66/docker-solr:4.10.4
 ```
 
@@ -89,8 +100,8 @@ mkdir -p data/batches data/cache data/bib
 docker run -i -t \
   -p 80:80 \
   --name open-oni-dev \
-  --link mysql:db \
-  --link solr:solr \
+  --link openoni-dev-mysql:db \
+  --link openoni-dev-solr:solr \
   -v $(pwd)/open-oni:/opt/openoni \
   -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev
@@ -145,4 +156,10 @@ docker exec -it open-oni-dev /test.sh
 
 ```bash
 docker exec -it open-oni-dev bash
+```
+
+**Remove the containers (not persistent data)**
+
+```bash
+./docker-clean.sh
 ```
