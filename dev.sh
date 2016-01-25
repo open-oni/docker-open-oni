@@ -19,7 +19,7 @@ container_start () {
   if [ "$2" == "false" ]; then
     docker start $1
   fi
-}  
+}
 
 # Make sure settings_local.py exists so the app doesn't crash
 if [ ! -f open-oni/settings_local.py ]; then
@@ -43,6 +43,9 @@ fi
 echo "Building openoni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
+# Copy latest openoni MySQL config into directory with dev overrides
+cp $(pwd)/open-oni/conf/mysql/openoni.cnf $(pwd)/mysql/
+
 MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-mysql 2> /dev/null)
 if [ -z "$MYSQL_STATUS" ]; then
   echo "Starting mysql ..."
@@ -54,6 +57,7 @@ if [ -z "$MYSQL_STATUS" ]; then
     -e MYSQL_USER=openoni \
     -e MYSQL_PASSWORD=openoni \
     --volumes-from openoni-dev-data-mysql \
+    -v /$(pwd)/mysql:/etc/mysql/conf.d \
     mysql
 
   while [ $DB_READY == 0 ]
@@ -64,7 +68,7 @@ if [ -z "$MYSQL_STATUS" ]; then
    then
      sleep 5
      let TRIES++
-     echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES" 
+     echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES"
      if [ "$TRIES" = "$MAX_TRIES" ]
      then
       echo "Looks like we couldn't get MySQL running. Could you check settings and try again?"
