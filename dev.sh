@@ -40,7 +40,7 @@ if [ -z "$SOLR_DATA_STATUS" ]; then
 fi
 
 # Make containers for mysql and solr
-echo "Building open oni for development"
+echo "Building openoni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
 MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-mysql 2> /dev/null)
@@ -97,7 +97,7 @@ else
   container_start "openoni-dev-solr" $SOLR_STATUS
 fi
 
-echo "Starting open oni for development ..."
+echo "Starting openoni for development ..."
 # Make sure subdirs are built
 mkdir -p data/batches data/cache data/bib
 docker run -i -t \
