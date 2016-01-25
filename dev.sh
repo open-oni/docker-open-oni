@@ -29,17 +29,18 @@ if [ -z "$MYSQL_STATUS" ]; then
     -e MYSQL_DATABASE=openoni \
     -e MYSQL_USER=openoni \
     -e MYSQL_PASSWORD=openoni \
+    -v /$(pwd)/open-oni/conf/openoni.cnf:/etc/mysql/conf.d/openoni.cnf \
     mysql
 
   while [ $DB_READY == 0 ]
   do
    if
      ! docker exec mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
-       -e 'ALTER DATABASE openoni charset=utf8' > /dev/null 2>/dev/null
+       -e 'SHOW DATABASES' > /dev/null 2>/dev/null
    then
      sleep 5
      let TRIES++
-     echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES" 
+     echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES"
      if [ "$TRIES" = "$MAX_TRIES" ]
      then
       echo "Looks like we couldn't get MySQL running. Could you check settings and try again?"
