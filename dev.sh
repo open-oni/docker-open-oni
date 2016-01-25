@@ -103,7 +103,7 @@ fi
 echo "Starting openoni for development ..."
 # Make sure subdirs are built
 mkdir -p data/batches data/cache data/bib
-docker run -i -t \
+docker run -itd \
   -p $PORT:80 \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
