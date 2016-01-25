@@ -94,8 +94,7 @@ if [ -z "$SOLR_STATUS" ]; then
     makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
 else
   start_container "solr" $SOLR_STATUS
-  
- fi
+fi
 echo "Starting open-oni for development ..."
 
 # Make sure subdirs are built
