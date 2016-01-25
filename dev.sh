@@ -9,8 +9,8 @@ SOLR=4.10.4
 SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
 TRIES=0
 
-docker stop open-oni-dev || true
-docker rm open-oni-dev || true
+docker stop openoni-dev || true
+docker rm openoni-dev || true
 
 # $1 = name of container, $2 = container running status
 container_start () {
