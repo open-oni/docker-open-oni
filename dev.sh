@@ -19,49 +19,64 @@ fi
 echo "Building open-oni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
-echo "Starting mysql ..."
-docker run -d \
-  -p 3306:3306 \
-  --name mysql \
-  -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
-  -e MYSQL_DATABASE=openoni \
-  -e MYSQL_USER=openoni \
-  -e MYSQL_PASSWORD=openoni \
-  mysql
+MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" mysql 2> /dev/null)
+if [ -z "$MYSQL_STATUS" ]; then
+  echo "Starting mysql ..."
+  docker run -d \
+    -p 3306:3306 \
+    --name mysql \
+    -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+    -e MYSQL_DATABASE=openoni \
+    -e MYSQL_USER=openoni \
+    -e MYSQL_PASSWORD=openoni \
+    mysql
 
-while [ $DB_READY == 0 ]
-do
- if
-   ! docker exec mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
-     -e 'ALTER DATABASE openoni charset=utf8' > /dev/null 2>/dev/null
- then
-   sleep 5
-   let TRIES++
-   echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES" 
-   if [ "$TRIES" = "$MAX_TRIES" ]
+  while [ $DB_READY == 0 ]
+  do
+   if
+     ! docker exec mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
+       -e 'ALTER DATABASE openoni charset=utf8' > /dev/null 2>/dev/null
    then
-    echo "Looks like we couldn't get MySQL running. Could you check settings and try again?"
-    exit 2
+     sleep 5
+     let TRIES++
+     echo "Looks like we're still waiting for MySQL ... 5 more seconds ... retry $TRIES of $MAX_TRIES" 
+     if [ "$TRIES" = "$MAX_TRIES" ]
+     then
+      echo "Looks like we couldn't get MySQL running. Could you check settings and try again?"
+      exit 2
+     fi
+   else
+     DB_READY=1
    fi
- else
-   DB_READY=1
+  done
+
+  # set up access to a test database, for masochists
+  echo "setting up a test database ..."
+  docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
+  GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
+else
+  echo "Existing mysql container found"
+  if [ "$MYSQL_STATUS" == "false" ]; then
+    docker start mysql
+  fi
+fi
+
+SOLR_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" solr 2> /dev/null)
+if [ -z "$SOLR_STATUS" ]; then
+  echo "Starting solr ..."
+  export SOLR=4.10.4
+  docker run -d \
+    -p 8983:8983 \
+    --name solr \
+    -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
+    -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+    makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
+else
+  echo "Existing solr container found"
+    if [ "$SOLR_STATUS" == "false" ]; then
+      docker start solr
+    fi
  fi
-done
-
-# set up access to a test database, for masochists
-echo "setting up a test database ..."
-docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
-GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
-
-echo "Starting solr ..."
-export SOLR=4.10.4
-docker run -d \
-  -p 8983:8983 \
-  --name solr \
-  -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
-  -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
-  makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
-
 echo "Starting open-oni for development ..."
 
 # Make sure subdirs are built
