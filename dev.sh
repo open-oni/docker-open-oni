@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -u
+
 DB_READY=0
 MAX_TRIES=12
 MYSQL_ROOT_PASSWORD=123456
