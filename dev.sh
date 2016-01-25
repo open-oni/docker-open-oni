@@ -1,40 +1,65 @@
 #!/bin/bash
 
-IP_ADDRESS=${1:-127.0.0.1}
-SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
-MYSQL_ROOT_PASSWORD=123456
-PORT=${DOCKERPORT:-80}
 DB_READY=0
-TRIES=0
+IP_ADDRESS=${1:-127.0.0.1}
 MAX_TRIES=12
+MYSQL_ROOT_PASSWORD=123456
+
+PORT=${DOCKERPORT:-80}
+SOLR=4.10.4
+SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
+TRIES=0
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
+
+# $1 = name of container, $2 = container running status
+container_start () {
+  echo "Existing $1 container found"
+  if [ "$2" == "false" ]; then
+    docker start $1
+  fi
+}  
 
 # Make sure settings_local.py exists so the app doesn't crash
 if [ ! -f open-oni/settings_local.py ]; then
   touch open-oni/settings_local.py
 fi
 
-echo "Building open-oni for development"
+# Make persistent data containers
+# If these containers are removed, you will lose all mysql and solr data
+MYSQL_DATA_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-data-mysql 2> /dev/null)
+if [ -z "$MYSQL_DATA_STATUS" ]; then
+  echo "Creating a data container for mysql ..."
+  docker create -v /var/lib/mysql --name openoni-dev-data-mysql mysql
+fi
+SOLR_DATA_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-data-solr 2> /dev/null)
+if [ -z "$SOLR_DATA_STATUS" ]; then
+  echo "Creating a data container for solr ..."
+  docker create -v /opt/solr --name openoni-dev-data-solr makuk66/docker-solr:$SOLR
+fi
+
+# Make containers for mysql and solr
+echo "Building openoni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
-MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" mysql 2> /dev/null)
+MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-mysql 2> /dev/null)
 if [ -z "$MYSQL_STATUS" ]; then
   echo "Starting mysql ..."
   docker run -d \
     -p 3306:3306 \
-    --name mysql \
+    --name openoni-dev-mysql \
     -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
     -e MYSQL_DATABASE=openoni \
     -e MYSQL_USER=openoni \
     -e MYSQL_PASSWORD=openoni \
+    --volumes-from openoni-dev-data-mysql \
     mysql
 
   while [ $DB_READY == 0 ]
   do
    if
-     ! docker exec mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
+     ! docker exec openoni-dev-mysql mysql -uroot -p$MYSQL_ROOT_PASSWORD \
        -e 'ALTER DATABASE openoni charset=utf8' > /dev/null 2>/dev/null
    then
      sleep 5
@@ -52,40 +77,34 @@ if [ -z "$MYSQL_STATUS" ]; then
 
   # set up access to a test database, for masochists
   echo "setting up a test database ..."
-  docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
+  docker exec openoni-dev-mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
   GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
 else
-  echo "Existing mysql container found"
-  if [ "$MYSQL_STATUS" == "false" ]; then
-    docker start mysql
-  fi
+  container_start "openoni-dev-mysql" $MYSQL_STATUS
 fi
 
-SOLR_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" solr 2> /dev/null)
+SOLR_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-solr 2> /dev/null)
 if [ -z "$SOLR_STATUS" ]; then
   echo "Starting solr ..."
-  export SOLR=4.10.4
   docker run -d \
     -p 8983:8983 \
-    --name solr \
+    --name openoni-dev-solr \
     -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
     -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+    --volumes-from openoni-dev-data-solr \
     makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
 else
-  echo "Existing solr container found"
-    if [ "$SOLR_STATUS" == "false" ]; then
-      docker start solr
-    fi
- fi
-echo "Starting open-oni for development ..."
+  container_start "openoni-dev-solr" $SOLR_STATUS
+fi
 
+echo "Starting openoni for development ..."
 # Make sure subdirs are built
 mkdir -p data/batches data/cache data/bib
 docker run -i -t \
   -p $PORT:80 \
-  --name open-oni-dev \
-  --link mysql:db \
-  --link solr:solr \
+  --name openoni-dev \
+  --link openoni-dev-mysql:db \
+  --link openoni-dev-solr:solr \
   -v $(pwd)/open-oni:/opt/openoni \
   -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev

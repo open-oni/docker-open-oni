@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 #
-# Cleans everything docker can leave behind.  NOT to be used in a production
-# environment.  You should probably be a little less brute-force with your
-# cleaning if you're not just developing stuff.
-docker rm $(docker ps -qa)
-docker rmi $(docker images | grep "<none>" | awk '{print $3}')
+# Stop and remove the docker containers necessary for open ONI
+# except for the persistent data containers
+
+echo "stopping ..."
+docker stop openoni-dev
+docker stop openoni-dev-mysql
+docker stop openoni-dev-solr
+
+echo "removing ..."
+docker rm openoni-dev
+docker rm openoni-dev-mysql
+docker rm openoni-dev-solr
+
+echo "Run ./dev.sh to set your environment back up"
