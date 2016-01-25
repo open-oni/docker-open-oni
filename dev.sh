@@ -1,7 +1,8 @@
 #!/bin/bash
 
+set -u
+
 DB_READY=0
-IP_ADDRESS=${1:-127.0.0.1}
 MAX_TRIES=12
 MYSQL_ROOT_PASSWORD=123456
 
@@ -10,8 +11,8 @@ SOLR=4.10.4
 SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
 TRIES=0
 
-docker stop open-oni-dev || true
-docker rm open-oni-dev || true
+docker stop openoni-dev || true
+docker rm openoni-dev || true
 
 # $1 = name of container, $2 = container running status
 container_start () {
@@ -104,7 +105,7 @@ fi
 echo "Starting openoni for development ..."
 # Make sure subdirs are built
 mkdir -p data/batches data/cache data/bib
-docker run -i -t \
+docker run -itd \
   -p $PORT:80 \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
@@ -112,3 +113,5 @@ docker run -i -t \
   -v $(pwd)/open-oni:/opt/openoni \
   -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev
+
+docker logs -f openoni-dev
