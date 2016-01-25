@@ -111,3 +111,5 @@ docker run -itd \
   -v $(pwd)/open-oni:/opt/openoni \
   -v $(pwd)/data:/opt/openoni/data \
   open-oni:dev
+
+docker logs -f openoni-dev
