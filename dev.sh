@@ -7,15 +7,38 @@ PORT=${DOCKERPORT:-80}
 DB_READY=0
 TRIES=0
 MAX_TRIES=12
+export SOLR=4.10.4
 
 docker stop open-oni-dev || true
 docker rm open-oni-dev || true
+
+# start_container $1 = name of container, $2 = container running status
+start_container () {
+  echo "Existing $1 container found"
+  if [ "$2" == "false" ]; then
+    docker start $1
+  fi
+}  
 
 # Make sure settings_local.py exists so the app doesn't crash
 if [ ! -f open-oni/settings_local.py ]; then
   touch open-oni/settings_local.py
 fi
 
+# Make persistent data containers
+# If these containers are removed, you will lose all mysql and solr data
+DATA_MYSQL_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" data_mysql 2> /dev/null)
+if [ -z "$DATA_MYSQL_STATUS" ]; then
+  echo "Creating a data container for mysql ..."
+  docker create -v /var/lib/mysql --name data_mysql mysql
+fi
+DATA_SOLR_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" data_solr 2> /dev/null)
+if [ -z "$DATA_SOLR_STATUS" ]; then
+  echo "Creating a data container for solr ..."
+  docker create -v /opt/solr --name data_solr makuk66/docker-solr:$SOLR
+fi
+
+# Make containers for mysql and solr
 echo "Building open-oni for development"
 docker build -t open-oni:dev -f Dockerfile-dev .
 
@@ -29,6 +52,7 @@ if [ -z "$MYSQL_STATUS" ]; then
     -e MYSQL_DATABASE=openoni \
     -e MYSQL_USER=openoni \
     -e MYSQL_PASSWORD=openoni \
+    --volumes-from data_mysql \
     mysql
 
   while [ $DB_READY == 0 ]
@@ -55,27 +79,22 @@ if [ -z "$MYSQL_STATUS" ]; then
   docker exec mysql mysql -u root --password=$MYSQL_ROOT_PASSWORD -e 'USE mysql;
   GRANT ALL on test_openoni.* TO "openoni"@"%" IDENTIFIED BY "openoni";';
 else
-  echo "Existing mysql container found"
-  if [ "$MYSQL_STATUS" == "false" ]; then
-    docker start mysql
-  fi
+  start_container "mysql" $MYSQL_STATUS
 fi
 
 SOLR_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" solr 2> /dev/null)
 if [ -z "$SOLR_STATUS" ]; then
   echo "Starting solr ..."
-  export SOLR=4.10.4
   docker run -d \
     -p 8983:8983 \
     --name solr \
     -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
     -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+    --volumes-from data_solr \
     makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
 else
-  echo "Existing solr container found"
-    if [ "$SOLR_STATUS" == "false" ]; then
-      docker start solr
-    fi
+  start_container "solr" $SOLR_STATUS
+  
  fi
 echo "Starting open-oni for development ..."
 
