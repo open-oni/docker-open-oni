@@ -58,7 +58,7 @@ if [ -z "$MYSQL_STATUS" ]; then
     -e MYSQL_USER=openoni \
     -e MYSQL_PASSWORD=openoni \
     --volumes-from openoni-dev-data-mysql \
-    -v /$(pwd)/mysql:/etc/mysql/conf.d \
+    -v /$(pwd)/mysql:/etc/mysql/conf.d:Z \
     mysql
 
   while [ $DB_READY == 0 ]
@@ -94,8 +94,8 @@ if [ -z "$SOLR_STATUS" ]; then
   docker run -d \
     -p 8983:8983 \
     --name openoni-dev-solr \
-    -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
-    -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+    -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml:Z \
+    -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml:Z \
     --volumes-from openoni-dev-data-solr \
     makuk66/docker-solr:$SOLR && sleep $SOLRDELAY
 else
@@ -110,8 +110,8 @@ docker run -itd \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
-  -v $(pwd)/open-oni:/opt/openoni \
-  -v $(pwd)/data:/opt/openoni/data \
+  -v $(pwd)/open-oni:/opt/openoni:Z \
+  -v $(pwd)/data:/opt/openoni/data:Z \
   open-oni:dev
 
 docker logs -f openoni-dev
