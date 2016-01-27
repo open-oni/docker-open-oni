@@ -1,4 +1,4 @@
-Docker open-oni
+Docker Open ONI
 ===============
 
 Install Docker.  We have comprehensive instructions for
@@ -10,7 +10,7 @@ production
 
 (Production instructions TBD - for now this is just for doing open-oni dev)
 
-open-oni development
+Open ONI Development
 ---
 
 Clone this repo, and then clone open-oni inside it:
@@ -89,9 +89,9 @@ docker run -d \
   makuk66/docker-solr:4.10.4
 ```
 
-#### Build open-oni
+#### Build Open ONI
 
-Start the development open-oni.  This will install requirements if needed, and
+Start the development Open ONI container. This will install requirements if needed, and
 run various django admin commands as found in [`startup.sh`](startup.sh):
 
 ```bash
@@ -99,7 +99,7 @@ mkdir -p data/batches data/cache data/bib
 
 docker run -i -t \
   -p 80:80 \
-  --name open-oni-dev \
+  --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
   -v $(pwd)/open-oni:/opt/openoni \
@@ -134,7 +134,7 @@ change your regular development workflow much at all.
 If requirements.pip is changed, you'll need to run the pip install in the container:
 
 ```bash
-docker exec -it open-oni-dev /pip-install.sh
+docker exec -it openoni-dev /pip-install.sh
 ```
 
 **Load data**
@@ -143,19 +143,19 @@ docker exec -it open-oni-dev /pip-install.sh
 cd data
 wget --recursive --no-host-directories --cut-dirs 1 --reject index.html* --include-directories /data/batches/batch_uuml_thys_ver01/ http://chroniclingamerica.loc.gov/data/batches/batch_uuml_thys_ver01/
 cd ..
-docker exec -it open-oni-dev /load_batch.sh batch_uuml_thys_ver01
+docker exec -it openoni-dev /load_batch.sh batch_uuml_thys_ver01
 ```
 
 **Run tests**
 
 ```bash
-docker exec -it open-oni-dev /test.sh
+docker exec -it openoni-dev /test.sh
 ```
 
 **Jump into the container**
 
 ```bash
-docker exec -it open-oni-dev bash
+docker exec -it openoni-dev bash
 ```
 
 **Remove the containers (not persistent data)**
