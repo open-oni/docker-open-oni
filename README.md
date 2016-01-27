@@ -91,7 +91,7 @@ docker run -d \
 
 #### Build Open ONI
 
-Start the development Open ONI  This will install requirements if needed, and
+Start the development Open ONI container. This will install requirements if needed, and
 run various django admin commands as found in [`startup.sh`](startup.sh):
 
 ```bash
