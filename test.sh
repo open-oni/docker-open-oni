@@ -2,7 +2,7 @@
 
 APP=core
 
-source /opt/chronam/ENV/bin/activate
+source /opt/openoni/ENV/bin/activate
 
-cd /opt/chronam
+cd /opt/openoni
 django-admin.py test $APP
