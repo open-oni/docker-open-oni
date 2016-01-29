@@ -102,14 +102,32 @@ else
   container_start "openoni-dev-solr" $SOLR_STATUS
 fi
 
+RAIS_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-rais 2> /dev/null)
+if [ -z "$RAIS_STATUS" ]; then
+  echo "Starting RAIS ..."
+  docker run -d \
+    -p 12415:12415 \
+    --name openoni-dev-rais \
+    -e PORT=12415 \
+    -e TILESIZES=512,1024 \
+    -e IIIFURL="http://localhost:12415/iiif" \
+    -v $(pwd)/data/batches:/var/local/images:Z \
+    uolibraries/rais
+
+else
+  container_start "openoni-dev-rais" $RAIS_STATUS
+fi
+
 echo "Starting openoni for development ..."
 # Make sure subdirs are built
 mkdir -p data/batches data/cache data/bib
 docker run -itd \
   -p $PORT:80 \
+  -e LOCALPORT=$PORT \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
+  --link openoni-dev-rais:rais \
   -v $(pwd)/open-oni:/opt/openoni:Z \
   -v $(pwd)/data:/opt/openoni/data:Z \
   open-oni:dev
