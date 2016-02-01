@@ -7,6 +7,21 @@ MAX_TRIES=12
 MYSQL_ROOT_PASSWORD=123456
 
 PORT=${DOCKERPORT:-80}
+
+APP_URL=${APP_URL:-}
+if [ -z "$APP_URL" ]; then
+  if [ -x docker-machine ]; then
+    ip=$(docker-machine ip default)
+    APP_URL="http://$ip"
+  else
+    APP_URL="http://localhost"
+  fi
+
+  if [ $PORT != 80 ]; then
+    APP_URL=$APP_URL:$PORT
+  fi
+fi
+
 SOLR=4.10.4
 SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
 TRIES=0
@@ -121,7 +136,7 @@ echo "Starting openoni for development ..."
 mkdir -p data/batches data/cache data/bib
 docker run -itd \
   -p $PORT:80 \
-  -e LOCALPORT=$PORT \
+  -e APP_URL=$APP_URL \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \

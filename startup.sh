@@ -12,7 +12,7 @@ sed -i "s/!SECRET_KEY!/$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 80)/g" 
 cp /etc/openoni.ini.orig /etc/openoni.ini
 sed -i "s/!DB_HOST!/$DB_PORT_3306_TCP_ADDR/g" /etc/openoni.ini
 sed -i "s/!SOLR_HOST!/$SOLR_PORT_8983_TCP_ADDR/g" /etc/openoni.ini
-sed -i "s/!LOCALPORT!/$LOCALPORT/g" /etc/openoni.ini
+sed -i "s|!APP_URL!|$APP_URL|g" /etc/openoni.ini
 
 # Hack apache to do the RAIS proxying
 cp /etc/apache2/sites-available/openoni-orig.conf /etc/apache2/sites-available/openoni.conf
