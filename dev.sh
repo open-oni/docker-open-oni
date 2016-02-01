@@ -109,8 +109,6 @@ if [ -z "$RAIS_STATUS" ]; then
     -p 12415:12415 \
     --name openoni-dev-rais \
     -e PORT=12415 \
-    -e TILESIZES=512,1024 \
-    -e IIIFURL="http://localhost:12415/iiif" \
     -v $(pwd)/data/batches:/var/local/images:Z \
     uolibraries/rais
 
