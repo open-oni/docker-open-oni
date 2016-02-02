@@ -124,7 +124,7 @@ if [ -z "$RAIS_STATUS" ]; then
     -p 12415:12415 \
     --name openoni-dev-rais \
     -e PORT=12415 \
-    -v $(pwd)/data/batches:/var/local/images:Z \
+    -v $(pwd)/data/batches:/var/local/images:z \
     uolibraries/rais
 
 else
@@ -142,7 +142,7 @@ docker run -itd \
   --link openoni-dev-solr:solr \
   --link openoni-dev-rais:rais \
   -v $(pwd)/open-oni:/opt/openoni:Z \
-  -v $(pwd)/data:/opt/openoni/data:Z \
+  -v $(pwd)/data:/opt/openoni/data:z \
   open-oni:dev
 
 docker logs -f openoni-dev
