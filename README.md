@@ -30,6 +30,15 @@ containers in order, and makes sure the app is ready to run.  For Linux users
 who can't (or don't want to) expose port 80, the environment variable
 `DOCKERPORT` will override the default of using port 80.
 
+If the image view isn't working, it is likely because you're running docker on
+a system other than localhost (e.g., users of docker-machine, users running a
+demo on a system exposed to the public).  In these cases, you may have to
+export the environment variable `APP_URL` to point to your VM.  e.g., `export
+APP_URL=http://192.168.99.105`.
+
+(Users of `docker-machine` who run the system inside a machine called "default"
+should have things working out of the box)
+
 ### Manual setup
 
 For more control, you can run the commands manually:
@@ -89,6 +98,20 @@ docker run -d \
   makuk66/docker-solr:4.10.4
 ```
 
+#### Run RAIS
+
+This pulls down and runs the latest RAIS, a tile server optimized for serving
+JP2 images:
+
+```bash
+docker run -d \
+  -p 12415:12415 \
+  --name openoni-dev-rais \
+  -e PORT=12415 \
+  -v $(pwd)/data/batches:/var/local/images \
+  uolibraries/rais
+```
+
 #### Build Open ONI
 
 Start the development Open ONI container. This will install requirements if needed, and
@@ -99,6 +122,7 @@ mkdir -p data/batches data/cache data/bib
 
 docker run -i -t \
   -p 80:80 \
+  -e APP_URL=http://site.com:8080 \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
@@ -116,6 +140,9 @@ tree, you could add this:
 ```
 -v /tmp/CachedENV:/opt/openoni/ENV \
 ```
+
+The `APP_URL` variable is substituted into the openoni.ini file for RAIS to run
+through Apache so you don't have to expose it directly.
 
 Workflow
 ---
