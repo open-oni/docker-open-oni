@@ -10,7 +10,7 @@ PORT=${DOCKERPORT:-80}
 
 APP_URL=${APP_URL:-}
 if [ -z "$APP_URL" ]; then
-  if [ -x docker-machine ]; then
+  if [ $(command -v docker-machine) ]; then
     ip=$(docker-machine ip default)
     APP_URL="http://$ip"
   else
