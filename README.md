@@ -92,8 +92,8 @@ what openoni uses.
 docker run -d \
   -p 8983:8983 \
   --name openoni-dev-solr \
-  -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
-  -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+  -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml:Z \
+  -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml:Z \
   --volumes-from openoni-dev-data-solr \
   makuk66/docker-solr:4.10.4
 ```
@@ -108,7 +108,7 @@ docker run -d \
   -p 12415:12415 \
   --name openoni-dev-rais \
   -e PORT=12415 \
-  -v $(pwd)/data/batches:/var/local/images \
+  -v $(pwd)/data/batches:/var/local/images:z \
   uolibraries/rais
 ```
 
@@ -126,8 +126,8 @@ docker run -i -t \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
-  -v $(pwd)/open-oni:/opt/openoni \
-  -v $(pwd)/data:/opt/openoni/data \
+  -v $(pwd)/open-oni:/opt/openoni:Z \
+  -v $(pwd)/data:/opt/openoni/data:z \
   open-oni:dev
 ```
 
@@ -138,7 +138,7 @@ folders as needed. For example, to keep virtualenv files out of your source
 tree, you could add this:
 
 ```
--v /tmp/CachedENV:/opt/openoni/ENV \
+-v /tmp/CachedENV:/opt/openoni/ENV:Z \
 ```
 
 The `APP_URL` variable is substituted into the openoni.ini file for RAIS to run
@@ -189,4 +189,10 @@ docker exec -it openoni-dev bash
 
 ```bash
 ./docker-clean.sh
+```
+
+**Remove persistent data containers and data volumes**
+```bash
+docker rm openoni-dev-data-mysql openoni-dev-data-solr
+docker volume rm $(docker volume ls -qf dangling=true)
 ```
