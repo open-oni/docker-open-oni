@@ -15,7 +15,7 @@ sed -i "s/!SOLR_HOST!/$SOLR_PORT_8983_TCP_ADDR/g" /etc/openoni.ini
 
 cd /opt/openoni
 source ENV/bin/activate
-django-admin.py syncdb --noinput --migrate
+django-admin.py syncdb --noinput
 django-admin.py openoni_sync
 django-admin.py collectstatic --noinput
 
