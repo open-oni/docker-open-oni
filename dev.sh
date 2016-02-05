@@ -7,6 +7,21 @@ MAX_TRIES=12
 MYSQL_ROOT_PASSWORD=123456
 
 PORT=${DOCKERPORT:-80}
+
+APP_URL=${APP_URL:-}
+if [ -z "$APP_URL" ]; then
+  if [ $(command -v docker-machine) ]; then
+    ip=$(docker-machine ip default)
+    APP_URL="http://$ip"
+  else
+    APP_URL="http://localhost"
+  fi
+
+  if [ $PORT != 80 ]; then
+    APP_URL=$APP_URL:$PORT
+  fi
+fi
+
 SOLR=4.10.4
 SOLRDELAY=${SOLRDELAY:-10} # interval to wait for dependent docker services to initialize
 TRIES=0
@@ -102,16 +117,32 @@ else
   container_start "openoni-dev-solr" $SOLR_STATUS
 fi
 
+RAIS_STATUS=$(docker inspect --type=container --format="{{ .State.Running }}" openoni-dev-rais 2> /dev/null)
+if [ -z "$RAIS_STATUS" ]; then
+  echo "Starting RAIS ..."
+  docker run -d \
+    -p 12415:12415 \
+    --name openoni-dev-rais \
+    -e PORT=12415 \
+    -v $(pwd)/data/batches:/var/local/images:z \
+    uolibraries/rais
+
+else
+  container_start "openoni-dev-rais" $RAIS_STATUS
+fi
+
 echo "Starting openoni for development ..."
 # Make sure subdirs are built
 mkdir -p data/batches data/cache data/bib
 docker run -itd \
   -p $PORT:80 \
+  -e APP_URL=$APP_URL \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
+  --link openoni-dev-rais:rais \
   -v $(pwd)/open-oni:/opt/openoni:Z \
-  -v $(pwd)/data:/opt/openoni/data:Z \
+  -v $(pwd)/data:/opt/openoni/data:z \
   open-oni:dev
 
 docker logs -f openoni-dev
