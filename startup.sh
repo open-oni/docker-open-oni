@@ -1,5 +1,9 @@
 #!/bin/bash
 
+export APACHE_RUN_USER=www-data
+export APACHE_RUN_GROUP=www-data
+mkdir -p /var/tmp/django_cache && chown -R www-data:www-data /var/tmp/django_cache
+
 if [ ! -d /opt/openoni/ENV ]; then
   /pip-install.sh
 fi
@@ -22,7 +26,7 @@ service apache2 reload
 
 cd /opt/openoni
 source ENV/bin/activate
-django-admin.py syncdb --noinput --migrate
+django-admin.py syncdb --noinput
 django-admin.py openoni_sync
 django-admin.py collectstatic --noinput
 
@@ -33,3 +37,4 @@ rm -f /var/run/apache2/apache2.pid
 
 source /etc/apache2/envvars
 exec apache2 -D FOREGROUND
+
