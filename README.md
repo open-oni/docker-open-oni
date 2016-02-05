@@ -30,6 +30,15 @@ containers in order, and makes sure the app is ready to run.  For Linux users
 who can't (or don't want to) expose port 80, the environment variable
 `DOCKERPORT` will override the default of using port 80.
 
+If the image view isn't working, it is likely because you're running docker on
+a system other than localhost (e.g., users of docker-machine, users running a
+demo on a system exposed to the public).  In these cases, you may have to
+export the environment variable `APP_URL` to point to your VM.  e.g., `export
+APP_URL=http://192.168.99.105`.
+
+(Users of `docker-machine` who run the system inside a machine called "default"
+should have things working out of the box)
+
 ### Manual setup
 
 For more control, you can run the commands manually:
@@ -83,10 +92,24 @@ what openoni uses.
 docker run -d \
   -p 8983:8983 \
   --name openoni-dev-solr \
-  -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml \
-  -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml \
+  -v /$(pwd)/solr/schema.xml:/opt/solr/example/solr/collection1/conf/schema.xml:Z \
+  -v /$(pwd)/solr/solrconfig.xml:/opt/solr/example/solr/collection1/conf/solrconfig.xml:Z \
   --volumes-from openoni-dev-data-solr \
   makuk66/docker-solr:4.10.4
+```
+
+#### Run RAIS
+
+This pulls down and runs the latest RAIS, a tile server optimized for serving
+JP2 images:
+
+```bash
+docker run -d \
+  -p 12415:12415 \
+  --name openoni-dev-rais \
+  -e PORT=12415 \
+  -v $(pwd)/data/batches:/var/local/images:z \
+  uolibraries/rais
 ```
 
 #### Build Open ONI
@@ -99,11 +122,12 @@ mkdir -p data/batches data/cache data/bib
 
 docker run -i -t \
   -p 80:80 \
+  -e APP_URL=http://site.com:8080 \
   --name openoni-dev \
   --link openoni-dev-mysql:db \
   --link openoni-dev-solr:solr \
-  -v $(pwd)/open-oni:/opt/openoni \
-  -v $(pwd)/data:/opt/openoni/data \
+  -v $(pwd)/open-oni:/opt/openoni:Z \
+  -v $(pwd)/data:/opt/openoni/data:z \
   open-oni:dev
 ```
 
@@ -114,8 +138,11 @@ folders as needed. For example, to keep virtualenv files out of your source
 tree, you could add this:
 
 ```
--v /tmp/CachedENV:/opt/openoni/ENV \
+-v /tmp/CachedENV:/opt/openoni/ENV:Z \
 ```
+
+The `APP_URL` variable is substituted into the openoni.ini file for RAIS to run
+through Apache so you don't have to expose it directly.
 
 Workflow
 ---
@@ -162,4 +189,10 @@ docker exec -it openoni-dev bash
 
 ```bash
 ./docker-clean.sh
+```
+
+**Remove persistent data containers and data volumes**
+```bash
+docker rm openoni-dev-data-mysql openoni-dev-data-solr
+docker volume rm $(docker volume ls -qf dangling=true)
 ```
