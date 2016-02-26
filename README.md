@@ -16,11 +16,11 @@ Open ONI Development
 Clone this repo, and then clone open-oni inside it:
 
 ```bash
-git clone git@github.com:open-oni/docker-open-oni.git
+git clone https://github.com/open-oni/docker-open-oni.git
 
 # Wait until the clone is finished, then:
 cd docker-open-oni
-git clone git@github.com:open-oni/open-oni.git
+git clone https://github.com/open-oni/open-oni.git
 ```
 
 ### Quick setup
