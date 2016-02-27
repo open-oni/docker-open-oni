@@ -123,6 +123,8 @@ if [ -z "$RAIS_STATUS" ]; then
   docker run -d \
     -p 12415:12415 \
     --name openoni-dev-rais \
+    -e TILESIZES=512,1024 \
+    -e IIIFURL="$APP_URL/images/iiif" \
     -e PORT=12415 \
     -v $(pwd)/data/batches:/var/local/images:z \
     uolibraries/rais
