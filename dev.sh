@@ -14,7 +14,8 @@ if [ -z "$APP_URL" ]; then
     ip=$(docker-machine ip default)
     APP_URL="http://$ip"
   else
-    APP_URL="http://localhost"
+    echo "Please set the APP_URL environment variable"
+    exit -1
   fi
 
   if [ $PORT != 80 ]; then

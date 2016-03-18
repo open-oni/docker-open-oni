@@ -25,19 +25,21 @@ git clone https://github.com/open-oni/open-oni.git
 
 ### Quick setup
 
-For a quick setup, just run [`./dev.sh`](dev.sh)  - it sets up all the
-containers in order, and makes sure the app is ready to run.  For Linux users
-who can't (or don't want to) expose port 80, the environment variable
-`DOCKERPORT` will override the default of using port 80.
+First, please set `APP_URL` to the public URL for your open-oni instance, for
+example:
 
-If the image view isn't working, it is likely because you're running docker on
-a system other than localhost (e.g., users of docker-machine, users running a
-demo on a system exposed to the public).  In these cases, you may have to
-export the environment variable `APP_URL` to point to your VM.  e.g., `export
-APP_URL=http://192.168.99.105`.
+    export APP_URL=http://oregonnews.uoregon.edu
 
-(Users of `docker-machine` who run the system inside a machine called "default"
-should have things working out of the box)
+You may want to put that in your `~/.profile` or equivalent so you don't forget
+to set it. As a convenience if you are using `docker-machine` on Windows or 
+OS X and have named your virtual machine `default` then `dev.sh` will attempt 
+to set APP_URL using using the virtual machine's IP address
+
+Now run [`./dev.sh`](dev.sh) which will set up all the containers in order, 
+and makes sure the app is ready to run.
+
+For Linux users who can't (or don't want to) expose port 80, the environment 
+variable `DOCKERPORT` will override the default of using port 80.
 
 ### Manual setup
 
