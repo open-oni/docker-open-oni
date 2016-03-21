@@ -14,7 +14,8 @@ if [ -z "$APP_URL" ]; then
     ip=$(docker-machine ip default)
     APP_URL="http://$ip"
   else
-    APP_URL="http://localhost"
+    echo "Please set the APP_URL environment variable"
+    exit -1
   fi
 
   if [ $PORT != 80 ]; then
@@ -123,6 +124,8 @@ if [ -z "$RAIS_STATUS" ]; then
   docker run -d \
     -p 12415:12415 \
     --name openoni-dev-rais \
+    -e TILESIZES=512,1024 \
+    -e IIIFURL="$APP_URL/images/iiif" \
     -e PORT=12415 \
     -v $(pwd)/data/batches:/var/local/images:z \
     uolibraries/rais
