@@ -1,6 +1,10 @@
 Docker Open ONI
 ===============
 
+***Please note***: This repository is **DEPRECATED**.  The docker setup is now in [the main Open ONI repository](https://github.com/open-oni/open-oni) now.  Please do not continue to use this repository!
+
+
+
 Install Docker.  We have comprehensive instructions for
 [installing Docker on OS X](https://github.com/open-oni/open-oni/wiki/Docker-Setup-OS-X)
 on the open-oni wiki.
